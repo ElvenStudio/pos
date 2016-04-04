@@ -34,4 +34,14 @@
             </t>
         </t>
     </t>
+    <t t-extend="Orderline">
+        <t t-jquery="t[t-esc='widget.format_currency(line.get_unit_price(),'Product Price')']" t-operation="replace">
+            <t t-if="widget.display_price_with_taxes">
+                <t t-esc="widget.format_currency(line.get_fiscal_unit_price().priceWithTax,'Product Price')" />
+            </t>
+            <t t-if="!widget.display_price_with_taxes">
+                <t t-esc="widget.format_currency(line.get_unit_price(),'Product Price')" />
+            </t>
+        </t>
+    </t>
 </templates>

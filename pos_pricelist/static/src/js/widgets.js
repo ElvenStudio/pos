@@ -20,6 +20,18 @@ function pos_pricelist_widgets(instance, module) {
     var round_di = instance.web.round_decimals;
 
     module.OrderWidget = module.OrderWidget.extend({
+        init: function(parent, options) {
+            this._super(parent, options);
+            this.display_price_with_taxes = false;
+            if (
+                posmodel
+                && posmodel.config
+                && posmodel.config.display_price_with_taxes
+            ) {
+                this.display_price_with_taxes
+                    = posmodel.config.display_price_with_taxes
+            }
+        },
         set_value: function (val) {
             this._super(val);
             var order = this.pos.get('selectedOrder');

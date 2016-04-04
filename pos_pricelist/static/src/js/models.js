@@ -182,6 +182,18 @@ function pos_pricelist_models(instance, module) {
                 this.set_unit_price(price);
             }
         },
+
+        get_base_price: function(){
+            var base_price = this.get_unit_price() * this.get_quantity() * (1 - this.get_discount()/100);
+
+            if (!this.manual_price) {
+                var rounding = this.pos.currency.rounding;
+                base_price = round_pr(base_price, rounding);
+            }
+
+            return base_price;
+        },
+
         /**
          * override this method to take fiscal positions in consideration
          * get all price
@@ -216,6 +228,77 @@ function pos_pricelist_models(instance, module) {
                 "taxDetails": taxdetail
             };
         },
+
+        // changes the base price of the product for this orderline
+        set_unit_price: function(price){
+            if (this.pos.config.manual_price_with_taxes) {
+                //price is tax included, calculate the real unit price
+                _(_(this.get_applicable_taxes_for_orderline()).reverse()).each(
+                    function(tax){
+                        if (tax.type === "percent") {
+                            price = price / (1 + tax.amount);
+                        } else if (tax.type === "fixed") {
+                            price = price - tax.amount;
+                        } else {
+                            throw "This type of tax is not supported by the point of sale: " + tax.type;
+                        }
+                    }
+                );
+                this.price = parseFloat(price) || 0;
+            }
+            else {
+                // why _super does not work?
+                this.price = round_di(parseFloat(price) || 0, this.pos.dp['Product Price']);
+            }
+            this.trigger('change',this);
+        },
+
+        /**
+         * Get the unit price with tax application
+         * TODO : find a better way to do it : need some refactoring in the pos standard
+         * @returns {{
+         *  priceWithTax: *, priceWithoutTax: *, tax: number, taxDetails: {}
+         *  }}
+         */
+        get_fiscal_unit_price: function(){
+            var base = round_pr(this.get_unit_price() * (1.0 - (this.get_discount() / 100.0)), this.pos.currency.rounding);
+            var totalTax = base;
+            var totalNoTax = base;
+            var taxtotal = 0;
+
+            var product =  this.get_product();
+            var taxes_ids = product.taxes_id;
+            var taxes =  this.pos.taxes;
+            var taxdetail = {};
+            var product_taxes = [];
+
+            _(taxes_ids).each(function(el){
+                product_taxes.push(_.detect(taxes, function(t){
+                    return t.id === el;
+                }));
+            });
+
+            var all_taxes = _(this.compute_all(product_taxes, base)).flatten();
+
+            _(all_taxes).each(function(tax) {
+                if (tax.price_include) {
+                    totalNoTax -= tax.amount;
+                } else {
+                    totalTax += tax.amount;
+                }
+                taxtotal += tax.amount;
+                taxdetail[tax.id] = tax.amount;
+            });
+            totalNoTax = round_pr(totalNoTax, this.pos.currency.rounding);
+
+            return {
+                "priceWithTax": totalTax,
+                "priceWithoutTax": totalNoTax,
+                "tax": taxtotal,
+                "taxDetails": taxdetail,
+            };
+        },
+
         /**
          * Override this method to avoid a return false
          * if the price is different
