@@ -36,7 +36,7 @@ Configuration
 You'll have new configuration parameters at Point of Sale > Configuration > Point of Sales
 
 * Price with Taxes: Show prices with taxes in POS session or not
-
+* Manual Price with Taxes: The manual price is intended with taxes in POS session or not
 
 Usage
 =====
@@ -57,10 +57,13 @@ The POS will recognize it and will compute the price according to the rule defin
 3. (default) : Any price type which is set on the product form
 
 3. An new option is introduced in the POS config to let the user show price with taxes in product widget.
-the UI is updated when we change the customer in order to adapt the prices.
+The UI is updated when we change the customer in order to adapt the prices.
 The computation take in account the pricelist and the fiscal position of the customer
 
-4. When we mouseover the price tag, a tooltip is shown to indicate the computation depending on the quantity like this output :
+4. An new option is introduced in the POS config to let the user to update product manual price included tax in numpad box.
+The computation take in account the pricelist and the fiscal position of the customer
+
+5. When we mouseover the price tag, a tooltip is shown to indicate the computation depending on the quantity like this output :
 1x -> 100 €
 3x -> 70 €
 5x -> 50 €
