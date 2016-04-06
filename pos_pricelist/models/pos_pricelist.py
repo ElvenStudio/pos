@@ -29,5 +29,5 @@ class PosPriceListConfig(models.Model):
 
     manual_price_with_taxes = fields.Boolean(
         string='Manual Price With Taxes',
-        help="Consider Manual Prices included tax on POS"
+        help="Consider Manual Prices included tax on POS."
     )

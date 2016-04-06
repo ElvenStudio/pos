@@ -183,12 +183,13 @@ function pos_pricelist_models(instance, module) {
             }
         },
 
-        get_base_price: function(){
-            var base_price = this.get_unit_price() * this.get_quantity() * (1 - this.get_discount()/100);
+        get_base_price: function() {
+            var base_price = 0;
 
             if (!this.manual_price) {
-                var rounding = this.pos.currency.rounding;
-                base_price = round_pr(base_price, rounding);
+                base_price = OrderlineParent.prototype.get_base_price.apply(this, arguments);
+            } else {
+                base_price = this.get_unit_price() * this.get_quantity() * (1 - this.get_discount()/100);
             }
 
             return base_price;
@@ -245,12 +246,12 @@ function pos_pricelist_models(instance, module) {
                     }
                 );
                 this.price = parseFloat(price) || 0;
+                this.trigger('change',this);
             }
             else {
-                // why _super does not work?
-                this.price = round_di(parseFloat(price) || 0, this.pos.dp['Product Price']);
+                // call standard set_unit_price
+                this.price = OrderlineParent.prototype.set_unit_price.apply(this, arguments);
             }
-            this.trigger('change',this);
         },
 
         /**
@@ -260,8 +261,13 @@ function pos_pricelist_models(instance, module) {
          *  priceWithTax: *, priceWithoutTax: *, tax: number, taxDetails: {}
          *  }}
          */
-        get_fiscal_unit_price: function(){
-            var base = round_pr(this.get_unit_price() * (1.0 - (this.get_discount() / 100.0)), this.pos.currency.rounding);
+        get_fiscal_unit_price: function() {
+            var base = this.get_unit_price() * (1.0 - (this.get_discount() / 100.0));
+
+            if (!this.manual_price) {
+                base = round_pr(base, this.pos.currency.rounding);
+            }
+
             var totalTax = base;
             var totalNoTax = base;
             var taxtotal = 0;
@@ -406,6 +412,10 @@ function pos_pricelist_models(instance, module) {
                     );
             }
             res["tax_ids"] = [[6, false, product_tax_ids]];
+
+            if (this.manual_price) {
+                res["manual_price_unit"] = this.get_unit_price();
+            }
             return res;
         }
     });

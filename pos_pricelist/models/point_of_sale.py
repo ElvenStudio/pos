@@ -47,7 +47,8 @@ class PosOrderLine(models.Model):
             'taxes': [],
         }
         for line in self:
-            price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+            price_unit = line.manual_price_unit if line.manual_price_unit != 0.0 else line.price_unit
+            price = price_unit * (1 - (line.discount or 0.0) / 100.0)
             taxes = line.tax_ids.compute_all(
                 price, line.qty, product=line.product_id,
                 partner=line.order_id.partner_id)
@@ -69,6 +70,7 @@ class PosOrderLine(models.Model):
         "Taxes", domain=[('type_tax_use', '=', 'sale')])
     price_subtotal = fields.Float(compute="_amount_line_all", store=True)
     price_subtotal_incl = fields.Float(compute="_amount_line_all", store=True)
+    manual_price_unit = fields.Float(default=0.0)
 
 
 class PosOrder(models.Model):
@@ -79,7 +81,8 @@ class PosOrder(models.Model):
 
     @api.model
     def _amount_line_tax(self, line):
-        price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+        price_unit = line.manual_price_unit if line.manual_price_unit != 0.0 else line.price_unit
+        price = price_unit * (1 - (line.discount or 0.0) / 100.0)
         taxes = line.tax_ids.compute_all(
             price, line.qty, product=line.product_id,
             partner=line.order_id.partner_id)['taxes']
