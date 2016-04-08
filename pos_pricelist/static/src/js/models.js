@@ -124,7 +124,12 @@ function pos_pricelist_models(instance, module) {
                 this.get('orderLines').add(line);
             }
             this.selectLine(this.getLastOrderline());
-        }
+        },
+        getTotalTaxIncluded: function() {
+            return round_pr((this.get('orderLines')).reduce((function(sum, orderLine) {
+                return sum + orderLine.get_price_with_tax();
+            }), 0), this.pos.currency.rounding);
+        },
     });
 
     /**
@@ -393,12 +398,16 @@ function pos_pricelist_models(instance, module) {
          * @returns {*}
          */
         get_display_price: function () {
+            var price = 0;
             if (this.pos.config.display_price_with_taxes) {
-                return this.get_price_with_tax();
+                price = this.get_price_with_tax();
             }
-            return OrderlineParent.prototype.get_display_price.apply(
-                this, arguments
-            );
+            else {
+                price = OrderlineParent.prototype.get_display_price.apply(
+                    this, arguments
+                );
+            }
+            return price;
         },
 
         export_as_JSON: function() {
