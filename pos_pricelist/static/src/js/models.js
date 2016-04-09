@@ -227,6 +227,7 @@ function pos_pricelist_models(instance, module) {
                 taxdetail[tax.id] = tax.amount;
             });
             totalNoTax = round_pr(totalNoTax, this.pos.currency.rounding);
+            totalTax = round_pr(totalTax, this.pos.currency.rounding);
             return {
                 "priceWithTax": totalTax,
                 "priceWithoutTax": totalNoTax,
