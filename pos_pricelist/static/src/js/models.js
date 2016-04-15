@@ -184,7 +184,7 @@ function pos_pricelist_models(instance, module) {
                the unit price of the previous quantity, to preserve manually
                entered prices as much as possible. */
             if (price !== false && price !== old_price) {
-                this.set_unit_price(price);
+                this.set_unit_price(old_price);
             }
         },
 
@@ -210,30 +210,44 @@ function pos_pricelist_models(instance, module) {
          *  }}
          */
         get_all_prices: function () {
-            var base = this.get_base_price();
-            var totalTax = base;
-            var totalNoTax = base;
-            var taxtotal = 0;
-            var taxdetail = {};
-            var product_taxes = this.get_applicable_taxes_for_orderline();
-            var all_taxes = _(this.compute_all(product_taxes, base)).flatten();
-            _(all_taxes).each(function (tax) {
-                if (tax.price_include) {
-                    totalNoTax -= tax.amount;
-                } else {
-                    totalTax += tax.amount;
-                }
-                taxtotal += tax.amount;
-                taxdetail[tax.id] = tax.amount;
-            });
-            totalNoTax = round_pr(totalNoTax, this.pos.currency.rounding);
-            totalTax = round_pr(totalTax, this.pos.currency.rounding);
-            return {
-                "priceWithTax": totalTax,
-                "priceWithoutTax": totalNoTax,
-                "tax": taxtotal,
-                "taxDetails": taxdetail
+
+            var prices = {
+                "priceWithTax": 0,
+                "priceWithoutTax": 0,
+                "tax": 0,
+                "taxDetails": {}
             };
+
+            if (this.pos.config.display_price_with_taxes) {
+                prices = this.get_fiscal_unit_price(this.get_quantity());
+            } else {
+                var base = this.get_base_price();
+                var totalTax = base;
+                var totalNoTax = base;
+                var taxtotal = 0;
+                var taxdetail = {};
+                var product_taxes = this.get_applicable_taxes_for_orderline();
+                var all_taxes = _(this.compute_all(product_taxes, base)).flatten();
+                _(all_taxes).each(function (tax) {
+                    if (tax.price_include) {
+                        totalNoTax -= tax.amount;
+                    } else {
+                        totalTax += tax.amount;
+                    }
+                    taxtotal += tax.amount;
+                    taxdetail[tax.id] = tax.amount;
+                });
+                totalNoTax = round_pr(totalNoTax, this.pos.currency.rounding);
+                totalTax = round_pr(totalTax, this.pos.currency.rounding);
+                prices = {
+                    "priceWithTax": totalTax,
+                    "priceWithoutTax": totalNoTax,
+                    "tax": taxtotal,
+                    "taxDetails": taxdetail
+                };
+            }
+
+            return prices;
         },
 
         // changes the base price of the product for this orderline
@@ -263,11 +277,13 @@ function pos_pricelist_models(instance, module) {
         /**
          * Get the unit price with tax application
          * TODO : find a better way to do it : need some refactoring in the pos standard
+         * @param quantity the quantity
          * @returns {{
          *  priceWithTax: *, priceWithoutTax: *, tax: number, taxDetails: {}
          *  }}
          */
-        get_fiscal_unit_price: function() {
+        get_fiscal_unit_price: function(quantity) {
+            quantity = quantity || 1.0;
             var base = this.get_unit_price() * (1.0 - (this.get_discount() / 100.0));
 
             if (!this.manual_price) {
@@ -299,15 +315,16 @@ function pos_pricelist_models(instance, module) {
                     totalTax += tax.amount;
                 }
                 taxtotal += tax.amount;
-                taxdetail[tax.id] = tax.amount;
+                taxdetail[tax.id] = tax.amount * quantity;
             });
             totalNoTax = round_pr(totalNoTax, this.pos.currency.rounding);
+            totalTax = round_pr(totalTax, this.pos.currency.rounding);
 
             return {
-                "priceWithTax": totalTax,
-                "priceWithoutTax": totalNoTax,
-                "tax": taxtotal,
-                "taxDetails": taxdetail,
+                "priceWithTax": totalTax * quantity,
+                "priceWithoutTax": totalNoTax * quantity,
+                "tax": taxtotal * quantity,
+                "taxDetails": taxdetail
             };
         },
 
@@ -340,7 +357,7 @@ function pos_pricelist_models(instance, module) {
          */
         merge: function (orderline) {
             OrderlineParent.prototype.merge.apply(this, arguments);
-            this.set_unit_price(orderline.price);
+            this.set_unit_price(orderline.get_display_unit_price());
         },
         /**
          * @param order
@@ -427,6 +444,12 @@ function pos_pricelist_models(instance, module) {
                 res["manual_price_unit"] = this.get_unit_price();
             }
             return res;
+        },
+
+        export_for_printing: function(){
+            var result = OrderlineParent.prototype.export_for_printing.apply(this, arguments);
+            result['price_unit_with_tax'] = this.get_display_unit_price();
+            return result;
         }
     });
 
