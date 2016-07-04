@@ -152,8 +152,15 @@ function pos_pricelist_models(instance, module) {
                 var price = this.pos.pricelist_engine.compute_price_all(
                     db, product, partner, qty
                 );
+
                 if (price !== false) {
                     this.price = round_di(parseFloat(price) || 0, this.pos.dp['Product Price']);
+                }
+
+                // If the price is include taxes,
+                // we need to rewrite the price to avoid rounding problem
+                if (this.pos.config.display_price_with_taxes) {
+                    this.set_unit_price(this.get_all_prices().priceWithTax);
                 }
             }
         },
