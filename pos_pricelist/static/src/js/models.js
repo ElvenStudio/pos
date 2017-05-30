@@ -633,6 +633,9 @@ function pos_pricelist_models(instance, module) {
                                 .hasOwnProperty(price_type.field)) {
                             price =
                                 db.product_by_id[product.id][price_type.field];
+                            if(price_type.field === 'list_price' && product.price_extra){
+                                price += product.price_extra;
+                            }
                         }
                 }
                 if (price !== false) {
@@ -782,7 +785,7 @@ function pos_pricelist_models(instance, module) {
         if (_.size(product_model) == 1) {
             var product_index = parseInt(Object.keys(product_model)[0]);
             pos_model.models[product_index].fields.push(
-                'categ_id', 'seller_ids'
+                'categ_id', 'seller_ids', 'price_extra'
             );
         }
 
@@ -830,7 +833,7 @@ function pos_pricelist_models(instance, module) {
                         'sequence',
                         'qty',
                         'product_tmpl_id'],
-                    domain: null,
+                    domain: [['product_tmpl_id.available_in_pos','=',true]],
                     loaded: function (self, supplierinfos) {
                         self.db.add_supplierinfo(supplierinfos);
                     }

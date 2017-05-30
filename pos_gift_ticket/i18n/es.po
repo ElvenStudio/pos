@@ -1,24 +1,25 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* pos_gift_ticket
-#
+# * pos_gift_ticket
+# 
+# Translators:
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 8.0\n"
+"Project-Id-Version: pos (8.0)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-17 07:44+0000\n"
-"PO-Revision-Date: 2015-08-17 07:44+0000\n"
-"Last-Translator: Ismael Calvo <ismael.calvo@factorlibre.com>\n"
-"Language-Team: \n"
-"Language: es\n"
+"POT-Creation-Date: 2016-04-15 14:51+0000\n"
+"PO-Revision-Date: 2016-04-06 15:48+0000\n"
+"Last-Translator: OCA Transbot <transbot@odoo-community.org>\n"
+"Language-Team: Spanish (http://www.transifex.com/oca/OCA-pos-8-0/language/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: \n"
+"Language: es\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: pos_gift_ticket
 #. openerp-web
-#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:22
+#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:30
 #, python-format
 msgid "GIFT TICKET"
 msgstr "TICKET REGALO"
@@ -32,22 +33,21 @@ msgstr "Ticket Regalo"
 
 #. module: pos_gift_ticket
 #. openerp-web
-#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:11
+#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:19
 #, python-format
 msgid "Phone:"
 msgstr "Teléfono:"
 
 #. module: pos_gift_ticket
 #. openerp-web
-#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:13
+#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:21
 #, python-format
 msgid "Shop:"
 msgstr "Tienda:"
 
 #. module: pos_gift_ticket
 #. openerp-web
-#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:12
+#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:20
 #, python-format
 msgid "User:"
 msgstr "Usuario:"
-
