@@ -29,9 +29,13 @@ To use this module, you need to:
 .. figure:: ./pos_margin/static/description/pos_order_form.png
    :width: 800px
 
+#. Go to 'Point Of Sale' / 'Daily Operations' / 'All Session'
+#. Open a session an read the total margin, computed as a sum of all margin from all order of this session.
+
 .. image:: https://odoo-community.org/website/image/ir.attachment/5784_f2813bd/datas
    :alt: Try me on Runbot
    :target: https://runbot.odoo-community.org/runbot/184/8.0
+
 
 
 Technical information

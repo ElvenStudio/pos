@@ -11,15 +11,28 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
         <field name="model">pos.order</field>
         <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//group[@name='order_total']" position="after">
-                <group name="margin">
-                    <field name="margin" widget='monetary'/>
-                </group>
-            </xpath>
+            <field name="amount_total" position="after">
+                <field name="margin" />
+            </field>
             <xpath expr="//field[@name='lines']/tree/field[@name='price_unit']" position="after">
                 <field name="purchase_price"/>
             </xpath>
         </field>
     </record>
+
+    <record id="pos_session_margin_form_view" model="ir.ui.view">
+        <field name="name">pos.session.margin.form.view</field>
+        <field name="model">pos.session</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
+        <field name="arch" type="xml">
+            <field name="statement_ids" position="after">
+                <group class="oe_subtotal_footer oe_right" colspan="2" name="margin_total">
+                    <field name="margin" class="oe_bold" />
+                </group>
+                <div class="oe_clear"/>
+            </field>
+        </field>
+    </record>
+
 
 </data></openerp>
