@@ -56,6 +56,7 @@ class POSOrder(models.Model):
                     if (line.account_id.id == order_account and
                             line.state == 'valid'):
                         grouped_data[key].append(line.id)
+
         for key, value in grouped_data.iteritems():
             for line in order.account_move.line_id:
                 if (line.partner_id.id == key[0] and
@@ -64,10 +65,18 @@ class POSOrder(models.Model):
                         line.state == 'valid'):
                     grouped_data[key].append(line.id)
                     break
+
         for key, value in grouped_data.iteritems():
             if not value:
                 continue
             self.pool.get('account.move.line').reconcile_partial(
                 cr, uid, value)
+
+        # after reconciliation, check if auto post created moves
+        for order in self.browse(cr, uid, ids, context=context):
+            if order.account_move and \
+               order.account_move.state == 'draft' and \
+               order.account_move.journal_id.entry_posted:
+                order.account_move.post()
 
         return to_ret
