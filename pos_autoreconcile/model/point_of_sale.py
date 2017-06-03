@@ -53,8 +53,7 @@ class POSOrder(models.Model):
                     continue
 
                 for line in each.journal_entry_id.line_id:
-                    if (line.account_id.id == order_account and
-                            line.state == 'valid'):
+                    if line.account_id.id == order_account and line.state == 'valid':
                         grouped_data[key].append(line.id)
 
         for key, value in grouped_data.iteritems():
@@ -64,13 +63,12 @@ class POSOrder(models.Model):
                         (line.debit > 0) == key[2] and
                         line.state == 'valid'):
                     grouped_data[key].append(line.id)
-                    break
+                    # break
 
         for key, value in grouped_data.iteritems():
             if not value:
                 continue
-            self.pool.get('account.move.line').reconcile_partial(
-                cr, uid, value)
+            self.pool.get('account.move.line').reconcile_partial(cr, uid, value)
 
         # after reconciliation, check if auto post created moves
         for order in self.browse(cr, uid, ids, context=context):
