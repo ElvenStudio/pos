@@ -1,19 +1,22 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* pos_margin
+# * pos_margin
 #
+# Translators:
+# OCA Transbot <transbot@odoo-community.org>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-30 17:11+0000\n"
-"PO-Revision-Date: 2017-05-30 17:11+0000\n"
-"Last-Translator: <>\n"
-"Language-Team: \n"
+"POT-Creation-Date: 2018-02-28 18:30+0000\n"
+"PO-Revision-Date: 2018-02-28 18:30+0000\n"
+"Last-Translator: OCA Transbot <transbot@odoo-community.org>, 2017\n"
+"Language-Team: Italian (https://www.transifex.com/oca/teams/23907/it/)\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: pos_margin
 #: field:pos.order.line,purchase_price:0
@@ -22,28 +25,25 @@ msgstr "Prezzo di Costo"
 
 #. module: pos_margin
 #: help:pos.order,margin:0
-msgid "It gives profitability by calculating the difference between the Unit Price and the cost price."
-msgstr "Mostra il profitto ottenuto calcolando la differenza tra prezzo unitario e prezzo di costo."
-
-#. module: pos_margin
-#: help:pos.session,margin:0
-msgid "It gives profitability by calculating the sum of all order margins."
-msgstr "Mostra il profitto ottenuto calcolando la somma dei margini degli ordini."
+msgid ""
+"It gives profitability by calculating the difference between the Unit Price "
+"and the cost price."
+msgstr ""
 
 #. module: pos_margin
 #: model:ir.model,name:pos_margin.model_pos_order_line
 msgid "Lines of Point of Sale"
-msgstr "Righe Punto Vendita"
+msgstr "Righe del Punto Vendita"
 
 #. module: pos_margin
-#: field:pos.order,margin:0
-#: field:pos.order.line,margin:0
-#: field:pos.session,margin:0
+#: field:pos.order,margin:0 field:pos.order.line,margin:0
 msgid "Margin"
-msgstr "Margine"
+msgstr ""
 
 #. module: pos_margin
 #: model:ir.model,name:pos_margin.model_pos_order
 msgid "Point of Sale"
 msgstr "Punto Vendita"
 
+#~ msgid "Total"
+#~ msgstr "Totale"

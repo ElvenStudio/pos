@@ -18,9 +18,12 @@
 #
 ##############################################################################
 
-
 from openerp import models, fields, api
 from openerp.addons import decimal_precision as dp
+from openerp.addons.point_of_sale.point_of_sale import pos_order as base_order
+from openerp.addons.pos_pricelist.models.pos_order_patch import (
+    _create_account_move_line)
+
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -67,10 +70,21 @@ class PosOrderLine(models.Model):
 
     tax_ids = fields.Many2many(
         'account.tax', 'pline_tax_rel', 'pos_line_id', 'tax_id',
-        "Taxes", domain=[('type_tax_use', '=', 'sale')])
+        "Taxes", domain=[('type_tax_use', 'in', ['sale', 'all'])])
     price_subtotal = fields.Float(compute="_amount_line_all", store=True)
     price_subtotal_incl = fields.Float(compute="_amount_line_all", store=True)
     manual_price_unit = fields.Float(default=0.0)
+
+    @api.multi
+    def onchange_product_id(
+            self, pricelist, product_id, qty=0, partner_id=False):
+        product_obj = self.env['product.product']
+        res = super(PosOrderLine, self).onchange_product_id(
+            pricelist, product_id, qty=qty, partner_id=partner_id)
+        if product_id:
+            product = product_obj.browse(product_id)
+            res['value']['tax_ids'] = product.taxes_id.ids
+        return res
 
 
 class PosOrder(models.Model):
@@ -78,6 +92,12 @@ class PosOrder(models.Model):
 
     taxes = fields.One2many(comodel_name='pos.order.tax',
                             inverse_name='pos_order', readonly=True)
+
+    @api.model
+    def _order_fields(self, ui_order):
+        res = super(PosOrder, self)._order_fields(ui_order)
+        res.update({'pricelist_id': ui_order.get('pricelist_id', False)})
+        return res
 
     @api.model
     def _amount_line_tax(self, line):
@@ -161,3 +181,8 @@ class PosOrder(models.Model):
         # Compute tax detail
         orders.compute_tax_detail()
         _logger.info("%d orders computed installing module.", len(orders))
+
+    def _register_hook(self, cr):
+        res = super(PosOrder, self)._register_hook(cr)
+        base_order._create_account_move_line = _create_account_move_line
+        return res

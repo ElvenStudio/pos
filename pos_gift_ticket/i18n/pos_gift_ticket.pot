@@ -1,13 +1,11 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#   * pos_gift_ticket
+#	* pos_gift_ticket
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-17 07:44+0000\n"
-"PO-Revision-Date: 2015-08-17 07:44+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,7 +15,7 @@ msgstr ""
 
 #. module: pos_gift_ticket
 #. openerp-web
-#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:22
+#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:30
 #, python-format
 msgid "GIFT TICKET"
 msgstr ""
@@ -31,21 +29,21 @@ msgstr ""
 
 #. module: pos_gift_ticket
 #. openerp-web
-#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:11
+#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:19
 #, python-format
 msgid "Phone:"
 msgstr ""
 
 #. module: pos_gift_ticket
 #. openerp-web
-#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:13
+#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:21
 #, python-format
 msgid "Shop:"
 msgstr ""
 
 #. module: pos_gift_ticket
 #. openerp-web
-#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:12
+#: code:addons/pos_gift_ticket/static/src/xml/pos.xml:20
 #, python-format
 msgid "User:"
 msgstr ""

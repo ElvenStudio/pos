@@ -74,61 +74,20 @@ function pos_pricelist_models(instance, module) {
     });
 
     /**
-     * Extend the order
+     * Extend the Order
      */
+    var moduleOrderParent = module.Order;
     module.Order = module.Order.extend({
-        /**
-         * override this method to merge lines
-         * TODO : Need some refactoring in the standard POS to Do it better
-         * TODO : from line 73 till 85, we need to move this to another method
-         * @param product
-         * @param options
-         */
-        addProduct: function (product, options) {
-            options = options || {};
-            var attr = JSON.parse(JSON.stringify(product));
-            attr.pos = this.pos;
-            attr.order = this;
-            var line = new module.Orderline({}, {
-                pos: this.pos,
-                order: this,
-                product: product
-            });
-            var self = this;
-            var found = false;
-
-            if (options.quantity !== undefined) {
-                line.set_quantity(options.quantity);
+        export_as_JSON: function() {
+            var order = moduleOrderParent.prototype.export_as_JSON.apply(this, arguments);
+            partner = this.get_client();
+            if (partner && partner.property_product_pricelist) {
+                pricelist_id = partner.property_product_pricelist[0];
+            } else {
+                pricelist_id = this.pos.config.pricelist_id[0];
             }
-            if (options.price !== undefined) {
-                line.set_unit_price(options.price);
-            }
-            if (options.discount !== undefined) {
-                line.set_discount(options.discount);
-            }
-
-            var orderlines = [];
-            if (self.get('orderLines').models !== undefined) {
-                orderlines = self.get('orderLines').models;
-            }
-            for (var i = 0; i < orderlines.length; i++) {
-                var _line = orderlines[i];
-                if (_line && _line.can_be_merged_with(line) &&
-                    options.merge !== false) {
-                    _line.merge(line);
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                this.get('orderLines').add(line);
-            }
-            this.selectLine(this.getLastOrderline());
-        },
-        getTotalTaxIncluded: function() {
-            return round_pr((this.get('orderLines')).reduce((function(sum, orderLine) {
-                return sum + orderLine.get_price_with_tax();
-            }), 0), this.pos.currency.rounding);
+            order['pricelist_id'] =  pricelist_id;
+            return order;
         },
     });
 
@@ -152,15 +111,8 @@ function pos_pricelist_models(instance, module) {
                 var price = this.pos.pricelist_engine.compute_price_all(
                     db, product, partner, qty
                 );
-
                 if (price !== false) {
                     this.price = round_di(parseFloat(price) || 0, this.pos.dp['Product Price']);
-                }
-
-                // If the price is include taxes,
-                // we need to rewrite the price to avoid rounding problem
-                if (this.pos.config.display_price_with_taxes) {
-                    this.set_unit_price(this.get_all_prices().priceWithTax);
                 }
             }
         },
@@ -191,22 +143,9 @@ function pos_pricelist_models(instance, module) {
                the unit price of the previous quantity, to preserve manually
                entered prices as much as possible. */
             if (price !== false && price !== old_price) {
-                this.set_unit_price(old_price);
+                this.set_unit_price(price);
             }
         },
-
-        get_base_price: function() {
-            var base_price = 0;
-
-            if (!this.manual_price) {
-                base_price = OrderlineParent.prototype.get_base_price.apply(this, arguments);
-            } else {
-                base_price = this.get_unit_price() * this.get_quantity() * (1 - this.get_discount()/100);
-            }
-
-            return base_price;
-        },
-
         /**
          * override this method to take fiscal positions in consideration
          * get all price
@@ -217,124 +156,30 @@ function pos_pricelist_models(instance, module) {
          *  }}
          */
         get_all_prices: function () {
-
-            var prices = {
-                "priceWithTax": 0,
-                "priceWithoutTax": 0,
-                "tax": 0,
-                "taxDetails": {}
-            };
-
-            if (this.pos.config.display_price_with_taxes) {
-                prices = this.get_fiscal_unit_price(this.get_quantity());
-            } else {
-                var base = this.get_base_price();
-                var totalTax = base;
-                var totalNoTax = base;
-                var taxtotal = 0;
-                var taxdetail = {};
-                var product_taxes = this.get_applicable_taxes_for_orderline();
-                var all_taxes = _(this.compute_all(product_taxes, base)).flatten();
-                _(all_taxes).each(function (tax) {
-                    if (tax.price_include) {
-                        totalNoTax -= tax.amount;
-                    } else {
-                        totalTax += tax.amount;
-                    }
-                    taxtotal += tax.amount;
-                    taxdetail[tax.id] = tax.amount;
-                });
-                totalNoTax = round_pr(totalNoTax, this.pos.currency.rounding);
-                totalTax = round_pr(totalTax, this.pos.currency.rounding);
-                prices = {
-                    "priceWithTax": totalTax,
-                    "priceWithoutTax": totalNoTax,
-                    "tax": taxtotal,
-                    "taxDetails": taxdetail
-                };
-            }
-
-            return prices;
-        },
-
-        // changes the base price of the product for this orderline
-        set_unit_price: function(price){
-            if (this.pos.config.manual_price_with_taxes) {
-                //price is tax included, calculate the real unit price
-                _(_(this.get_applicable_taxes_for_orderline()).reverse()).each(
-                    function(tax){
-                        if (tax.type === "percent") {
-                            price = price / (1 + tax.amount);
-                        } else if (tax.type === "fixed") {
-                            price = price - tax.amount;
-                        } else {
-                            throw "This type of tax is not supported by the point of sale: " + tax.type;
-                        }
-                    }
-                );
-                this.price = parseFloat(price) || 0;
-                this.trigger('change',this);
-            }
-            else {
-                // call standard set_unit_price
-                this.price = OrderlineParent.prototype.set_unit_price.apply(this, arguments);
-            }
-        },
-
-        /**
-         * Get the unit price with tax application
-         * TODO : find a better way to do it : need some refactoring in the pos standard
-         * @param quantity the quantity
-         * @returns {{
-         *  priceWithTax: *, priceWithoutTax: *, tax: number, taxDetails: {}
-         *  }}
-         */
-        get_fiscal_unit_price: function(quantity) {
-            quantity = quantity || 1.0;
-            var base = this.get_unit_price() * (1.0 - (this.get_discount() / 100.0));
-
-            if (!this.manual_price) {
-                base = round_pr(base, this.pos.currency.rounding);
-            }
-
+            var base = this.get_base_price();
             var totalTax = base;
             var totalNoTax = base;
             var taxtotal = 0;
-
-            var product =  this.get_product();
-            var taxes_ids = product.taxes_id;
-            var taxes =  this.pos.taxes;
             var taxdetail = {};
-            var product_taxes = [];
-
-            _(taxes_ids).each(function(el){
-                product_taxes.push(_.detect(taxes, function(t){
-                    return t.id === el;
-                }));
-            });
-
+            var product_taxes = this.get_applicable_taxes_for_orderline();
             var all_taxes = _(this.compute_all(product_taxes, base)).flatten();
-
-            _(all_taxes).each(function(tax) {
+            _(all_taxes).each(function (tax) {
                 if (tax.price_include) {
                     totalNoTax -= tax.amount;
                 } else {
                     totalTax += tax.amount;
                 }
                 taxtotal += tax.amount;
-                taxdetail[tax.id] = tax.amount * quantity;
+                taxdetail[tax.id] = tax.amount;
             });
             totalNoTax = round_pr(totalNoTax, this.pos.currency.rounding);
-            totalTax = round_pr(totalTax, this.pos.currency.rounding);
-
             return {
-                "priceWithTax": totalTax * quantity,
-                "priceWithoutTax": totalNoTax * quantity,
-                "tax": taxtotal * quantity,
+                "priceWithTax": totalTax,
+                "priceWithoutTax": totalNoTax,
+                "tax": taxtotal,
                 "taxDetails": taxdetail
             };
         },
-
         /**
          * Override this method to avoid a return false
          * if the price is different
@@ -364,7 +209,7 @@ function pos_pricelist_models(instance, module) {
          */
         merge: function (orderline) {
             OrderlineParent.prototype.merge.apply(this, arguments);
-            this.set_unit_price(orderline.get_display_unit_price());
+            this.set_unit_price(orderline.price);
         },
         /**
          * @param order
@@ -423,16 +268,12 @@ function pos_pricelist_models(instance, module) {
          * @returns {*}
          */
         get_display_price: function () {
-            var price = 0;
             if (this.pos.config.display_price_with_taxes) {
-                price = this.get_price_with_tax();
+                return this.get_price_with_tax();
             }
-            else {
-                price = OrderlineParent.prototype.get_display_price.apply(
-                    this, arguments
-                );
-            }
-            return price;
+            return OrderlineParent.prototype.get_display_price.apply(
+                this, arguments
+            );
         },
 
         export_as_JSON: function() {
@@ -446,17 +287,7 @@ function pos_pricelist_models(instance, module) {
                     );
             }
             res["tax_ids"] = [[6, false, product_tax_ids]];
-
-            if (this.manual_price) {
-                res["manual_price_unit"] = this.get_unit_price();
-            }
             return res;
-        },
-
-        export_for_printing: function(){
-            var result = OrderlineParent.prototype.export_for_printing.apply(this, arguments);
-            result['price_unit_with_tax'] = this.get_display_unit_price();
-            return result;
         }
     });
 
@@ -514,6 +345,62 @@ function pos_pricelist_models(instance, module) {
             }
             return version;
         },
+
+        /**
+         * Check if a pricelist rule can be used
+         * @param item
+         * @param product
+         * @param version
+         * @returns {boolean}
+         */
+        rule_match: function (db, item, product, qty, version) {
+          // get categories
+          var categ_ids = [];
+          if (product.categ_id) {
+              categ_ids.push(product.categ_id[0]);
+              categ_ids = categ_ids.concat(
+                  db.product_category_ancestors[product.categ_id[0]]
+              );
+          }
+
+          var cond = true
+          var template_false = item.product_tmpl_id === false
+          var product_false = item.product_id === false
+          var template_match = (
+            !template_false &&
+            item.product_tmpl_id[0] ===  product.product_tmpl_id
+          )
+          var product_match = (
+            !product_false &&
+            item.product_id[0] === product.id
+          )
+
+          // Check if products/template combination is possible
+          cond = cond && (
+            (product_false && template_false) ||
+            (product_match && (template_false || template_match)) ||
+            (template_match && product_false)
+          )
+
+          // Check category
+          cond = cond && (
+              item.categ_id === false ||
+              categ_ids.indexOf(item.categ_id[0]) !== -1
+          )
+
+          // Check version
+          cond = cond && (
+              item.price_version_id[0] === version.id
+          )
+
+          // Check product qty
+          cond = cond && (
+            !item.min_quantity ||
+            qty >= item.min_quantity
+          )
+
+          return cond
+        },
         /**
          * compute the price for the given product
          * @param database
@@ -538,25 +425,13 @@ function pos_pricelist_models(instance, module) {
                 return false;
             }
 
-            // get categories
-            var categ_ids = [];
-            if (product.categ_id) {
-                categ_ids.push(product.categ_id[0]);
-                categ_ids = categ_ids.concat(
-                    db.product_category_ancestors[product.categ_id[0]]
-                );
-            }
 
             // find items
             var items = [], i, len;
             for (i = 0, len = db.pricelist_item_sorted.length; i < len; i++) {
                 var item = db.pricelist_item_sorted[i];
-                if ((item.product_id === false
-                    || item.product_id[0] === product.id) &&
-                    (item.categ_id === false
-                    || categ_ids.indexOf(item.categ_id[0]) !== -1) &&
-                    (item.price_version_id[0] === version.id)) {
-                    items.push(item);
+                if (this.rule_match(db, item, product, qty, version)) {
+                  items.push(item)
                 }
             }
 
@@ -569,13 +444,6 @@ function pos_pricelist_models(instance, module) {
             for (i = 0, len = items.length; i < len; i++) {
                 var rule = items[i];
 
-                if (rule.min_quantity && qty < rule.min_quantity) {
-                    continue;
-                }
-                if (rule.product_id && rule.product_id[0]
-                    && product.id != rule.product_id[0]) {
-                    continue;
-                }
                 if (rule.categ_id) {
                     var cat_id = product.categ_id[0];
                     while (cat_id) {
@@ -588,6 +456,7 @@ function pos_pricelist_models(instance, module) {
                         continue;
                     }
                 }
+
                 // Based on field
                 switch (rule.base) {
                     case -1:
@@ -707,7 +576,12 @@ function pos_pricelist_models(instance, module) {
                             || 0, this.pos.dp['Product Price']);
                         price = this.pos_widget.format_currency(price);
                         if (k == 0) {
-                            $(product_ui).find('.price-tag').html(price);
+                            if (product.to_weight) {
+                                $(product_ui).find('.price-tag').html(price
+                                  + ' / ' + this.pos_widget.pos.units_by_id[product.uom_id[0]].name);
+                            } else {
+                                $(product_ui).find('.price-tag').html(price);
+                            }
                         }
                         prices_displayed += qty
                             + 'x &#8594; ' + price + '<br/>';
@@ -856,11 +730,17 @@ function pos_pricelist_models(instance, module) {
                         'name',
                         'version_id',
                         'currency_id'],
-                    domain: function () {
+                    domain: function (self) {
                         return [
-                            ['type', '=', 'sale']
+                            '|',
+                            '|',
+                            ['id', '=', self.config.pricelist_id[0]],
+                            ['pos_config_ids', '=', false],
+                            ['pos_config_ids', 'in', [self.config.id]],
+                            ['type', '=', 'sale'],
                         ]
                     },
+                    context: function(self){ return { pos_config_id: self.config.id }; },
                     loaded: function (self, pricelists) {
                         self.db.add_pricelists(pricelists);
                     }
@@ -871,8 +751,13 @@ function pos_pricelist_models(instance, module) {
                         'pricelist_id',
                         'date_start',
                         'date_end',
-                        'items'],
-                    domain: null,
+                        ],
+                    domain: function (self) {
+                        var pricelist_ids = _.map(_.keys(self.db.pricelist_by_id), function(el){return parseInt(el)});
+                        return [
+                            ['pricelist_id', 'in', pricelist_ids]
+                        ]
+                    },
                     loaded: function (self, versions) {
                         self.db.add_pricelist_versions(versions);
                     }
@@ -894,7 +779,12 @@ function pos_pricelist_models(instance, module) {
                         'product_tmpl_id',
                         'sequence'
                     ],
-                    domain: null,
+                    domain: function (self) {
+                        var version_ids = _.map(_.keys(self.db.pricelist_version_by_id), function (el){return parseInt(el);});
+                        return [
+                            ['price_version_id', 'in', version_ids]
+                        ];
+                    },
                     loaded: function (self, items) {
                         self.db.add_pricelist_items(items);
                     }

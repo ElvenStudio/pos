@@ -5,7 +5,7 @@
 
 {
     'name': 'POS Pricelist',
-    'version': '8.0.1.3.0',
+    'version': '8.0.1.5.0',
     'category': 'Point Of Sale',
     'sequence': 1,
     'author': "Adil Houmadi @Taktik, "
@@ -31,4 +31,5 @@
     ],
     'post_init_hook': "set_pos_line_taxes",
     'installable': True,
+    'license': 'AGPL-3',
 }

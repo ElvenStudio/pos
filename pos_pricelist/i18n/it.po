@@ -1,21 +1,23 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * pos_pricelist
-# 
+#
 # Translators:
+# Paolo Valier, 2016
 # Paolo Valier, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: pos (8.0)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-05-01 05:28+0000\n"
-"PO-Revision-Date: 2016-05-01 08:45+0000\n"
-"Last-Translator: Paolo Valier\n"
-"Language-Team: Italian (http://www.transifex.com/oca/OCA-pos-8-0/language/it/)\n"
+"POT-Creation-Date: 2018-02-28 18:31+0000\n"
+"PO-Revision-Date: 2017-12-01 20:36+0000\n"
+"Last-Translator: OCA Transbot <transbot@odoo-community.org>\n"
+"Language-Team: Italian (http://www.transifex.com/oca/OCA-pos-8-0/language/"
+"it/)\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: it\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: pos_pricelist
@@ -25,12 +27,12 @@ msgstr "Importo"
 
 #. module: pos_pricelist
 #. openerp-web
-#: code:addons/pos_pricelist/static/src/js/models.js:402
+#: code:addons/pos_pricelist/static/src/js/models.js:422
 #, python-format
 msgid ""
-"At least one pricelist has no active version ! Please create or activate "
-"one."
-msgstr "Almeno un Listino Prezzi non ha una versione attiva! Creare ed attivarne una."
+"At least one pricelist has no active version ! Please create or activate one."
+msgstr ""
+"Almeno un Listino Prezzi non ha una versione attiva! Creare ed attivarne una."
 
 #. module: pos_pricelist
 #: field:pos.order.tax,base:0 view:website:point_of_sale.report_receipt
@@ -63,6 +65,13 @@ msgid "Display Prices with taxes on POS"
 msgstr "Visualizza Prezzi con imposte nel POS"
 
 #. module: pos_pricelist
+#: code:addons/pos_pricelist/models/pos_order_patch.py:28
+#: code:addons/pos_pricelist/models/pos_order_patch.py:154
+#, python-format
+msgid "Error!"
+msgstr "Errore!"
+
+#. module: pos_pricelist
 #: field:pos.order.tax,id:0
 msgid "ID"
 msgstr "ID"
@@ -86,6 +95,13 @@ msgstr "Ultimo Aggiornamento il"
 #: model:ir.model,name:pos_pricelist.model_pos_order_line
 msgid "Lines of Point of Sale"
 msgstr "Righe del Punto Vendita"
+
+#. module: pos_pricelist
+#. openerp-web
+#: code:addons/pos_pricelist/static/src/xml/pos.xml:46
+#, python-format
+msgid "N/A"
+msgstr ""
 
 #. module: pos_pricelist
 #: field:pos.order.tax,pos_order:0
@@ -113,9 +129,25 @@ msgid "POS Product 4"
 msgstr "Prodotto 4 POS"
 
 #. module: pos_pricelist
+#: model:ir.model,name:pos_pricelist.model_res_partner
+msgid "Partner"
+msgstr ""
+
+#. module: pos_pricelist
 #: view:pos.order:pos_pricelist.view_pos_pos_form
 msgid "Payments"
 msgstr "Pagamenti"
+
+#. module: pos_pricelist
+#: code:addons/pos_pricelist/models/pos_order_patch.py:154
+#, python-format
+msgid "Please define income account for this product: \"%s\" (id:%d)."
+msgstr ""
+
+#. module: pos_pricelist
+#: field:product.pricelist,pos_config_ids:0
+msgid "PoS"
+msgstr ""
 
 #. module: pos_pricelist
 #: model:ir.model,name:pos_pricelist.model_pos_order
@@ -129,13 +161,31 @@ msgstr "Prezzi con Imposte"
 
 #. module: pos_pricelist
 #. openerp-web
-#: code:addons/pos_pricelist/static/src/js/models.js:401
+#: code:addons/pos_pricelist/static/src/xml/pos.xml:41
+#: code:addons/pos_pricelist/static/src/xml/pos.xml:55
+#: model:ir.model,name:pos_pricelist.model_product_pricelist
+#, fuzzy, python-format
+msgid "Pricelist"
+msgstr "Errore Listino di Vendita"
+
+#. module: pos_pricelist
+#. openerp-web
+#: code:addons/pos_pricelist/static/src/js/models.js:421
 #, python-format
 msgid "Pricelist Error"
 msgstr "Errore Listino di Vendita"
 
 #. module: pos_pricelist
+#: code:addons/pos_pricelist/models/pos_order_patch.py:28
+#, python-format
+msgid "Selected orders do not have the same session!"
+msgstr ""
+
+#. module: pos_pricelist
+#: code:addons/pos_pricelist/models/pos_order_patch.py:190
+#: code:addons/pos_pricelist/models/pos_order_patch.py:207
 #: field:pos.order.tax,tax:0 view:website:point_of_sale.report_receipt
+#, python-format
 msgid "Tax"
 msgstr "Imposta"
 
@@ -159,3 +209,20 @@ msgstr "Posizione Fiscale Imposte"
 #: view:pos.order:pos_pricelist.view_pos_pos_form
 msgid "Taxes detail"
 msgstr "Dettaglio Imposte"
+
+#. module: pos_pricelist
+#: code:addons/pos_pricelist/models/pos_order_patch.py:119
+#, python-format
+msgid "The POS order must have lines when calling this method"
+msgstr ""
+
+#. module: pos_pricelist
+#: code:addons/pos_pricelist/models/pos_order_patch.py:220
+#, python-format
+msgid "Trade Receivables"
+msgstr ""
+
+#. module: pos_pricelist
+#: help:product.pricelist,pos_config_ids:0
+msgid "if empty will be available for all the pos"
+msgstr ""

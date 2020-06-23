@@ -6,4 +6,6 @@
 from . import account_fiscal_position
 from . import pos_pricelist
 from . import point_of_sale
+from . import pos_order_patch
+from . import res_partner
 from . import point_of_sale_v7

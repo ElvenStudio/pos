@@ -6,8 +6,6 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-24 07:13+0000\n"
-"PO-Revision-Date: 2015-07-24 07:13+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -32,6 +30,16 @@ msgid "Check if you want this category to appear in Point Of Sale.\n"
 msgstr ""
 
 #. module: pos_remove_pos_category
+#: field:product.category,image:0
+msgid "Image"
+msgstr ""
+
+#. module: pos_remove_pos_category
+#: field:product.category,image_medium:0
+msgid "Image medium"
+msgstr ""
+
+#. module: pos_remove_pos_category
 #: model:ir.model,name:pos_remove_pos_category.model_ir_module_module
 msgid "Module"
 msgstr ""
@@ -44,5 +52,15 @@ msgstr ""
 #. module: pos_remove_pos_category
 #: model:ir.model,name:pos_remove_pos_category.model_product_template
 msgid "Product Template"
+msgstr ""
+
+#. module: pos_remove_pos_category
+#: help:product.category,image:0
+msgid "Show Image Category in Form View"
+msgstr ""
+
+#. module: pos_remove_pos_category
+#: help:product.category,image_medium:0
+msgid "Show image category button in POS"
 msgstr ""
 
