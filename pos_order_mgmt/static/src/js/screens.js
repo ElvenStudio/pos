@@ -7,6 +7,7 @@ function pos_order_mgmt_screens(instance, module) {
     module.OrderListScreenWidget = module.ScreenWidget.extend({
         template: 'OrderListScreenWidget',
         model: 'pos.order',
+        auto_back: true,
 
         init: function(parent, options){
             this._super(parent, options);
@@ -19,23 +20,11 @@ function pos_order_mgmt_screens(instance, module) {
             this.perform_search();
         },
 
-        auto_back: true,
-
-        show: function() {
-            var self = this;
-            var previous_screen = false;
-            if (this.pos.get_order()) {
-                previous_screen = this.pos.get_order().get_screen_data(
-                    'previous-screen');
-            }
-            if (previous_screen === 'receipt') {
-                this.gui.screen_instances.receipt.click_next();
-                this.gui.show_screen('orderlist');
-            }
-
+        renderElement: function() {
             this._super();
-            this.renderElement();
+            var self = this;
 
+            // register handlers
             this.$('.back').click(function () {
                 self.pos_widget.screen_selector.back();
             });
@@ -44,7 +33,6 @@ function pos_order_mgmt_screens(instance, module) {
                 this.pos_widget.onscreen_keyboard){
                 this.pos_widget.onscreen_keyboard.connect(this.$('.searchbox input'));
             }
-
 
             var search_timeout = null;
             this.$('.searchbox input').on('keyup', function () {
@@ -58,8 +46,23 @@ function pos_order_mgmt_screens(instance, module) {
             this.$('.searchbox .search-clear').click(function () {
                 self.clear_search();
             });
+        },
 
-            this.perform_search();
+        show: function() {
+            // in receipt screen we not allow di show order list screen
+            var previous_screen = this.pos.get_order().get_screen_data('previous-screen');
+            if (previous_screen === 'receipt') {
+                this.hide();
+
+                // finish current order, yet validate and printed
+                this.pos.get('selectedOrder').destroy();
+            }
+            else {
+                this._super();
+
+                // perform empty search to fill list with last orders
+                this.perform_search();
+            }
         },
 
         render_list: function(orders){
@@ -109,6 +112,10 @@ function pos_order_mgmt_screens(instance, module) {
                 // We cancel the action
                 return;
             }
+            // force go-back to remove the order-list screen in the current order
+            this.pos_widget.screen_selector.back();
+
+            // launch required action and the result can be a new order when in copy/refund case
             this['action_' + action](order_data, order);
         },
 
