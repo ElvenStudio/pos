@@ -43,3 +43,34 @@
 .orderlist-screen table td:not([name='td_ol_customer']) {
     white-space: nowrap;
 }
+
+
+.pos .subwindow-container-fix.pos-functions-container {
+    background-color: #F0EEEE;
+    white-space: nowrap;
+}
+
+.pos .pos-functions {
+	padding: 8px;
+}
+
+.pos .pos-functions button {
+	height: 39px;
+	display: block;
+	width: 100%;
+	margin: 0px -6px 4px -2px;
+	font-weight: bold;
+	vertical-align: middle;
+	color: #555555;
+	font-size: 14px;
+}
+
+.pos .pos-functions button:active {
+    border: none;
+    color: white;
+    background: #7f82ac;
+}
+
+.pos .pos-functions button i.fa {
+	margin-right: 5px;
+}

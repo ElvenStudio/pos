@@ -13,6 +13,7 @@ function pos_order_mgmt_screens(instance, module) {
             this._super(parent, options);
 
             // this.order_cache = new DomCache();
+            pos = this.pos;
             this.order_cache = [];
             this.orders = [];
             this.unknown_products = [];

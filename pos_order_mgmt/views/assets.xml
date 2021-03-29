@@ -9,9 +9,15 @@
                 <script type="text/javascript" src="/pos_order_mgmt/static/src/js/screens.js"/>
                 <script type="text/javascript" src="/pos_order_mgmt/static/src/js/widgets.js"/>
 
-                <link rel="stylesheet" href="/pos_order_mgmt/static/src/css/pos.css"/>
+<!--                <link rel="stylesheet" href="/pos_order_mgmt/static/src/css/pos.css"/>-->
             </xpath>
 
+        </template>
+
+        <template id="pos_order_mgmt_assets2" name="pos_order_mgmt_assets2" inherit_id="point_of_sale.index">
+            <xpath expr="//script[@id='loading-script']" position="before">
+                <link rel="stylesheet" href="/pos_order_mgmt/static/src/css/pos.css"/>
+            </xpath>
         </template>
     </data>
 </openerp>
